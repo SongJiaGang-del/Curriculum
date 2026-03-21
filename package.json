@@ -1,0 +1,29 @@
+{
+    "id": "nutpi-utils",
+    "name": "nutpi-utils",
+    "displayName": "nutpi-utils",
+    "version": "1.0.1",
+    "description": "支持鸿蒙的拨打电话，发短信、退出应用、电量获取等功能",
+    "keywords": [
+        "\"鸿蒙\"",
+        "\"电量获取\"",
+        "\"拨打电话\"",
+        "\"发短信\"",
+        "\"退出应用\""
+    ],
+    "dcloudext": {
+        "type": "component-vue",
+        "sale": {
+            "regular": {
+                "price": "0.00"
+            },
+            "sourcecode": {
+                "price": "0.00"
+            }
+        }
+    },
+    "uni_modules": {
+        "dependencies": [],
+        "encrypt": []
+    }
+}

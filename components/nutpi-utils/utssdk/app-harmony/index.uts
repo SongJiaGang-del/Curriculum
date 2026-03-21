@@ -1,0 +1,160 @@
+
+/**
+ * 系统工具模块
+ * 提供电话、短信、系统信息等常用功能
+ */
+
+// 基础模块导入
+import call from '@ohos.telephony.call';
+import common from '@ohos.app.ability.common';
+import Want from '@ohos.app.ability.Want';
+import { BusinessError } from '@kit.BasicServicesKit';
+import batteryInfo from '@ohos.batteryInfo';
+import { deviceInfo } from '@kit.BasicServicesKit';
+import { scanCore, scanBarcode } from '@kit.ScanKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+// 类型定义
+import { GetBatteryInfo, GetBatteryInfoOptions, GetBatteryInfoSuccess, GetBatteryInfoResult, GetBatteryInfoSync } from '../interface.uts';
+
+type PhoneType = string;
+
+/**
+ * 短信信息类
+ */
+class smsInfo {
+    telephone: PhoneType;
+    
+    constructor(telephone: PhoneType) {
+        this.telephone = telephone;
+    }
+}
+
+// ==================== 电话功能 ====================
+
+/**
+ * 拨打电话
+ * @param telephone - 电话号码
+ */
+export function makeCall(telephone: PhoneType): void {
+    if (!telephone) {
+        console.error('telephone is required');
+        return;
+    }
+    
+    call.makeCall(telephone, (err: BusinessError) => {
+        if (err) {
+            console.error(`makeCall fail, err->${JSON.stringify(err)}`);
+        } else {
+            console.log('makeCall success');
+        }
+    });
+}
+
+// ==================== 短信功能 ====================
+
+/**
+ * 发送短信
+ * @param telephone - 电话号码
+ * @param smsContext - 短信内容(可选)
+ */
+export function sendSms(telephone: PhoneType, smsContext?: string): void {
+    if (!telephone) {
+        console.error('telephone is required');
+        return;
+    }
+    
+    const contactInfo: Array<smsInfo> = [new smsInfo(telephone)];
+    const context = getContext() as common.UIAbilityContext;
+    
+    const want: Want = {
+        bundleName: 'com.ohos.mms',
+        abilityName: 'com.ohos.mms.MainAbility',
+        parameters: {
+            contactObjects: JSON.stringify(contactInfo),
+            content: smsContext || '',
+            pageFlag: 'conversation'
+        }
+    };
+    
+    context.startAbility(want)
+        .then(() => {
+            console.info('Succeed to invoke startAbility.');
+        })
+        .catch((err: BusinessError) => {
+            console.error(`Failed to startAbility. Code: ${err.code}, message: ${err.message}`);
+        });
+}
+
+// ==================== 应用控制 ====================
+
+/**
+ * 退出应用程序
+ */
+export function exitAPP(): void {
+    try {
+        const context = getContext() as common.UIAbilityContext;
+        context.terminateSelf((err: BusinessError) => {
+            if (err.code) {
+                console.error(`terminateSelf failed, code: ${err.code}`);
+            }
+        });
+    } catch (err) {
+        const error = err as BusinessError;
+        console.error(`terminateSelf failed, code: ${error.code}, message: ${error.message}`);
+    }
+}
+
+// ==================== 电池信息 ====================
+
+/**
+ * 同步获取电池信息
+ * @param options - 配置选项
+ */
+export const getBatteryInfo: GetBatteryInfo = function(options: GetBatteryInfoOptions): void {
+    const batteryInfoResult: GetBatteryInfoSuccess = {
+        errMsg: "getBatteryInfo:ok",
+        level: batteryInfo.batterySOC,
+        isCharging: batteryInfo.chargingStatus === batteryInfo.BatteryChargeState.ENABLE || 
+                   batteryInfo.chargingStatus === batteryInfo.BatteryChargeState.FULL,
+    };
+    
+    try {
+        options.success?.(batteryInfoResult);
+    } catch (e) {
+        console.error(e);
+    }
+    
+    try {
+        options.complete?.(batteryInfoResult);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+/**
+ * 异步获取电池信息
+ * @returns 电池信息对象
+ */
+export const getBatteryInfoSync: GetBatteryInfoSync = function(): GetBatteryInfoResult {
+    return {
+        level: batteryInfo.batterySOC,
+        isCharging: batteryInfo.chargingStatus === batteryInfo.BatteryChargeState.ENABLE || 
+                   batteryInfo.chargingStatus === batteryInfo.BatteryChargeState.FULL,
+    };
+};
+
+// ==================== 系统信息 ====================
+
+/**
+ * 获取系统信息
+ * @returns 系统信息对象
+ */
+export const getSystemInfo = () => {
+    try {
+        return uni.getSystemInfoSync();
+    } catch (e) {
+        console.error('获取系统信息失败：', e);
+        return null;
+    }
+};

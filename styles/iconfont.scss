@@ -1,0 +1,14 @@
+/* 阿里巴巴矢量图标库（iconfont）接入：
+ * 1) 在 iconfont.cn 项目中下载「font-class」方式代码
+ * 2) 将生成的 iconfont.css 内容复制到这里（建议只保留 @font-face 与 .iconfont / .icon-xxx）
+ * 3) 代码里用 <text class="iconfont icon-xxx"></text>
+ *
+ * 目前先放一个占位，保证项目可运行；你接入后替换即可。
+ */
+
+.iconfont {
+	font-family: "iconfont";
+	font-size: 32rpx;
+	font-style: normal;
+}
+
